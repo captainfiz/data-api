@@ -6,7 +6,13 @@ const MONGODB_API_KEY = "JI7nznWcSDKLZjc8Krp6rfsiUbKfmk4roLdJiM6Bo7f76oOwSFwiPNM
 type Banner = {
   _id: string;
   title: string;
-  imageUrl: string;
+  url: string;
+};
+
+type MongoBannerDocument = {
+  _id: { $oid: string };
+  title: string;
+  url: string;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -19,33 +25,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           "api-key": MONGODB_API_KEY,
         },
         body: JSON.stringify({
-          collection: "banners", // Ensure the collection name is correct
-          database: "company-b", // Your database name
-          dataSource: "Cluster0", // Your data source
+          collection: "banners",
+          database: "company-b",
+          dataSource: "Cluster0",
         }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        console.error("Error fetching banners:", result);
         return res.status(500).json({ message: "Failed to fetch banners", error: result });
       }
 
-      // Map over the result documents and return only necessary fields
-      const banners: Banner[] = result?.documents.map((doc: any) => ({
-        _id: doc._id["$oid"],
+      const banners: Banner[] = result?.documents.map((doc: MongoBannerDocument) => ({
+        _id: doc._id.$oid,
         title: doc.title,
         url: doc.url,
       }));
 
       res.status(200).json(banners);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching banners:", error);
-      res.status(500).json({ message: "Failed to fetch banners", error: error.message });
+      res.status(500).json({ message: "Failed to fetch banners", error: (error as Error).message });
     }
   } else {
-    // Handle unsupported methods
     res.status(405).json({ message: "Method not allowed" });
   }
 }

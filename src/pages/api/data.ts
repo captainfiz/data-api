@@ -17,7 +17,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: "Name and email are required" });
       }
 
-      // Ensure you're using the correct endpoint and method
       const response = await fetch(`${MONGODB_DATA_API_URL}/insertOne`, {
         method: "POST",
         headers: {
@@ -28,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           collection: "users",
           database: "company-b",
           dataSource: "Cluster0",
-          document: { name, email }, // Only include the fields you want to insert
+          document: { name, email },
         }),
       });
 
@@ -40,12 +39,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       res.status(201).json({ message: "Contact added successfully", data: result });
-    } catch (error:any) {
-      console.error("Error adding contact:", error);
-      res.status(500).json({ message: "Failed to add contact", error: error.message });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error adding contact:", error.message);
+        res.status(500).json({ message: "Failed to add contact", error: error.message });
+      } else {
+        console.error("Unknown error adding contact:", error);
+        res.status(500).json({ message: "Failed to add contact", error: "Unknown error occurred" });
+      }
     }
   } else {
-    // Handle unsupported methods (if necessary)
     res.status(405).json({ message: "Method not allowed" });
   }
 }

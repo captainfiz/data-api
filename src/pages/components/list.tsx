@@ -1,5 +1,6 @@
 // pages/list.tsx
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface Item {
   id: number;
@@ -25,10 +26,13 @@ export default function List() {
           <li key={item.id}>
             <h3>{item.title}</h3>
             <a href="#" target="_blank" rel="noopener noreferrer">
-              <img
+              <Image
                 src={item.url}
                 alt={item.title}
-                style={{ width: "150px", height: "150px" }}
+                width={150}
+                height={150}
+                priority={false} // Change to true if you want to prioritize loading
+                style={{ objectFit: "cover" }}
               />
             </a>
           </li>
